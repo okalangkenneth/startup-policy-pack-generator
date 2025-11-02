@@ -1,6 +1,8 @@
 import { useState } from "react";
 import JSZip from "jszip";
 import { saveAs } from "file-saver";
+import { jsPDF } from "jspdf";
+import { Document, Packer, Paragraph, TextRun, HeadingLevel } from "docx";
 
 // Embed markdown templates as raw strings (no fetch on file://)
 import privacy from "./templates/privacy-policy.md?raw";
@@ -10,6 +12,8 @@ import cookie from "./templates/cookie-policy.md?raw";
 import retention from "./templates/retention-security-checklist.md?raw";
 import acceptable from "./templates/acceptable-use-policy.md?raw";
 import dmca from "./templates/dmca-policy.md?raw";
+import dpa from "./templates/data-processing-agreement.md?raw";
+import subprocessors from "./templates/subprocessor-list.md?raw";
 
 const DEFAULTS = {
   COMPANY_NAME: "",
@@ -26,6 +30,7 @@ const DEFAULTS = {
   SUPERVISORY_AUTHORITY_URL: "https://www.imy.se/",
   COOKIE_POLICY_URL: "",
   LAST_UPDATED: new Date().toISOString().slice(0,10),
+  POLICY_VERSION: "1.0",
   SERVICE_DESCRIPTION: "Hosted web application providing [what it does]",
   PRICING_URL: "",
   REFUND_POLICY_URL: "",
@@ -58,41 +63,126 @@ function fill(template, map) {
   return out;
 }
 
+// Helper to convert markdown to plain text for PDF/DOCX
+function markdownToPlainText(md) {
+  return md
+    .replace(/^#{1,6}\s+(.+)$/gm, '$1\n')
+    .replace(/\*\*(.+?)\*\*/g, '$1')
+    .replace(/\*(.+?)\*/g, '$1')
+    .replace(/\[(.+?)\]\(.+?\)/g, '$1')
+    .replace(/^[-*+]\s+/gm, '• ')
+    .replace(/^\d+\.\s+/gm, '')
+    .trim();
+}
+
 export default function App() {
   const [vals, setVals] = useState(DEFAULTS);
+  const [exportFormat, setExportFormat] = useState("markdown");
   const [isGenerating, setIsGenerating] = useState(false);
   const onChange = (e) => setVals(v => ({ ...v, [e.target.name]: e.target.value }));
+
+  const files = [
+    ["privacy-policy", "Privacy Policy", privacy],
+    ["terms-of-service", "Terms of Service", tos],
+    ["ai-use-disclosure", "AI Use Disclosure", ai],
+    ["cookie-policy", "Cookie Policy", cookie],
+    ["retention-security-checklist", "Data Retention & Security Checklist", retention],
+    ["acceptable-use-policy", "Acceptable Use Policy", acceptable],
+    ["dmca-policy", "DMCA Copyright Policy", dmca],
+    ["data-processing-agreement", "Data Processing Agreement", dpa],
+    ["subprocessor-list", "Subprocessor List", subprocessors],
+  ];
+
+  const generatePDF = (name, title, content) => {
+    const pdf = new jsPDF();
+    const text = markdownToPlainText(fill(content, vals));
+    const lines = pdf.splitTextToSize(text, 180);
+
+    pdf.setFontSize(16);
+    pdf.text(title, 15, 15);
+    pdf.setFontSize(10);
+    pdf.text(lines, 15, 30);
+
+    return pdf.output('blob');
+  };
+
+  const generateDOCX = async (name, title, content) => {
+    const text = markdownToPlainText(fill(content, vals));
+    const paragraphs = text.split('\n\n').map(p =>
+      new Paragraph({
+        children: [new TextRun(p)],
+        spacing: { after: 200 }
+      })
+    );
+
+    const doc = new Document({
+      sections: [{
+        properties: {},
+        children: [
+          new Paragraph({
+            text: title,
+            heading: HeadingLevel.HEADING_1,
+          }),
+          ...paragraphs
+        ]
+      }]
+    });
+
+    return await Packer.toBlob(doc);
+  };
 
   const generateZip = async () => {
     setIsGenerating(true);
     const zip = new JSZip();
 
-    const files = [
-      ["privacy-policy.md", privacy],
-      ["terms-of-service.md", tos],
-      ["ai-use-disclosure.md", ai],
-      ["cookie-policy.md", cookie],
-      ["retention-security-checklist.md", retention],
-      ["acceptable-use-policy.md", acceptable],
-      ["dmca-policy.md", dmca],
-    ];
+    for (const [name, title, content] of files) {
+      const filledContent = fill(content, vals);
 
-    for (const [name, content] of files) {
-      zip.file(name, fill(content, vals));
+      if (exportFormat === "markdown") {
+        zip.file(`${name}.md`, filledContent);
+      } else if (exportFormat === "pdf") {
+        const pdfBlob = generatePDF(name, title, content);
+        zip.file(`${name}.pdf`, pdfBlob);
+      } else if (exportFormat === "docx") {
+        const docxBlob = await generateDOCX(name, title, content);
+        zip.file(`${name}.docx`, docxBlob);
+      } else if (exportFormat === "all") {
+        zip.file(`markdown/${name}.md`, filledContent);
+        const pdfBlob = generatePDF(name, title, content);
+        zip.file(`pdf/${name}.pdf`, pdfBlob);
+        const docxBlob = await generateDOCX(name, title, content);
+        zip.file(`docx/${name}.docx`, docxBlob);
+      }
     }
 
-    zip.file("README.md",
-`# Startup Policy Pack
+    const readmeContent = `# Startup Policy Pack
 
-Generated for: ${vals.COMPANY_NAME} on ${vals.LAST_UPDATED}.
-Open each .md, review, and publish.
+Generated for: ${vals.COMPANY_NAME || "Your Company"}
+Version: ${vals.POLICY_VERSION}
+Date: ${vals.LAST_UPDATED}
+Format: ${exportFormat.toUpperCase()}
+
+## Documents Included
+
+${files.map(([, title]) => `- ${title}`).join('\n')}
+
+## Instructions
+
+1. Review each document carefully
+2. Customize any sections marked with brackets
+3. Have legal counsel review before publishing
+4. Update the "Last Updated" date when making changes
 
 **Informational only — not legal advice.**
-`);
+`;
+
+    zip.file("README.md", readmeContent);
 
     const blob = await zip.generateAsync({ type: "blob" });
-    const name = `policy-pack-${(vals.COMPANY_NAME || "company").replace(/\s+/g,"-")}.zip`;
-    saveAs(blob, name);
+    const companySlug = (vals.COMPANY_NAME || "company").replace(/\s+/g,"-");
+    const formatSuffix = exportFormat === "all" ? "all-formats" : exportFormat;
+    const zipName = `policy-pack-${companySlug}-v${vals.POLICY_VERSION}-${formatSuffix}.zip`;
+    saveAs(blob, zipName);
     setIsGenerating(false);
   };
 
@@ -220,7 +310,7 @@ Open each .md, review, and publish.
         <header style={styles.header}>
           <h1 style={styles.title}>Startup Policy Pack</h1>
           <p style={styles.subtitle}>
-            Generate 7 GDPR-compliant legal documents in minutes: Privacy Policy, Terms of Service, AI Use Disclosure, Cookie Policy, Data Retention Checklist, Acceptable Use Policy, and DMCA Policy
+            Generate 9 GDPR-compliant legal documents in minutes with export options (Markdown, PDF, DOCX)
           </p>
         </header>
 
@@ -263,6 +353,64 @@ Open each .md, review, and publish.
           <Section title="AI Usage (if applicable)">
             <Field name="AI_PROVIDERS" label="AI Providers" placeholder="OpenAI, Anthropic, Azure OpenAI" />
             <Field name="AI_USE_AREAS" label="AI Use Cases" placeholder="content assistance, summarization" />
+          </Section>
+
+          <Section title="Export Settings">
+            <div>
+              <label htmlFor="policy-version" style={{ display: "block" }}>
+                <div style={{
+                  fontSize: 13,
+                  fontWeight: 600,
+                  color: "#374151",
+                  marginBottom: 6
+                }}>
+                  Policy Version
+                </div>
+                <input
+                  id="policy-version"
+                  type="text"
+                  className="form-input"
+                  name="POLICY_VERSION"
+                  value={vals.POLICY_VERSION}
+                  onChange={onChange}
+                  placeholder="1.0"
+                />
+              </label>
+            </div>
+
+            <div>
+              <label htmlFor="export-format" style={{ display: "block" }}>
+                <div style={{
+                  fontSize: 13,
+                  fontWeight: 600,
+                  color: "#374151",
+                  marginBottom: 6
+                }}>
+                  Export Format <span style={{ color: "#ef4444" }}>*</span>
+                </div>
+                <select
+                  id="export-format"
+                  className="form-input"
+                  value={exportFormat}
+                  onChange={(e) => setExportFormat(e.target.value)}
+                  style={{
+                    width: "100%",
+                    padding: "12px",
+                    border: "2px solid #e5e7eb",
+                    borderRadius: 8,
+                    fontSize: 15,
+                    outline: "none",
+                    boxSizing: "border-box",
+                    backgroundColor: "#fff",
+                  }}
+                >
+                  <option value="markdown">Markdown (.md) - Editable text format</option>
+                  <option value="pdf">PDF (.pdf) - Print-ready documents</option>
+                  <option value="docx">Word (.docx) - Microsoft Word format</option>
+                  <option value="all">All Formats - MD, PDF, and DOCX</option>
+                </select>
+              </label>
+            </div>
           </Section>
 
           <button

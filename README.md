@@ -30,16 +30,26 @@ A professional, single-file web application that helps startups and small busine
 - **Data Retention & Security Checklist**
 - **Acceptable Use Policy**
 - **DMCA Copyright Policy**
+- **Data Processing Agreement (DPA)**
+- **Subprocessor List**
+
+**NEW**: Export in multiple formats - Markdown, PDF, DOCX, or all formats at once!
 
 ## ✨ Features
 
 - ✅ **Offline-first**: Works completely offline, no server required
-- ✅ **Single-file distribution**: Entire app in one HTML file (256 KB)
+- ✅ **Single-file distribution**: Entire app in one HTML file (1.38 MB, 423 KB gzipped)
 - ✅ **Professional design**: Clean, modern grey-themed UI with responsive layout
-- ✅ **7 Complete Templates**: All essential startup legal documents
-- ✅ **Organized Sections**: Form grouped into 6 logical categories
+- ✅ **9 Complete Templates**: All essential startup legal documents including DPA
+- ✅ **Multiple Export Formats**:
+  - **Markdown** (.md) - Editable text format
+  - **PDF** (.pdf) - Print-ready documents
+  - **Word** (.docx) - Microsoft Word format
+  - **All Formats** - Get MD, PDF, and DOCX in one ZIP
+- ✅ **Version Tracking**: Track policy versions for compliance
+- ✅ **Organized Sections**: Form grouped into 7 logical categories
 - ✅ **Smart Validation**: Required field indicators and proper input types
-- ✅ **ZIP export**: Download all 7 policies in one click
+- ✅ **ZIP export**: Download all policies in one click
 - ✅ **GDPR-focused**: Templates designed for European compliance
 - ✅ **GitHub Actions**: Automated builds and deployments
 - ✅ **Open Source**: MIT license, free to use and modify
