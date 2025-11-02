@@ -12,14 +12,12 @@ Generate GDPR-compliant privacy policies, terms of service, and compliance docum
 ## 📸 Screenshots
 
 ### Main Interface
-![Main Form Interface](./docs/screenshots/main-form.png)
+![Main Form Interface](./docs/screenshots/main-form.jpg)
 *Professional grey-themed form with organized sections for easy data entry*
 
 ### Generated Output
-![ZIP Download](./docs/screenshots/zip-output.png)
+![ZIP Download](./docs/screenshots/zip-output.jpg)
 *One-click ZIP download with all 7 policy documents*
-
-> **Note**: To add screenshots, take screenshots of the application and save them in `docs/screenshots/` folder.
 
 ## Overview
 
