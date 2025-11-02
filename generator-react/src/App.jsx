@@ -179,43 +179,31 @@ Open each .md, review, and publish.
     },
   };
 
-  const Field = ({ name, label, placeholder = "", required = false, type = "text" }) => (
-    <label style={{ display: "block" }}>
-      <div style={{
-        fontSize: 13,
-        fontWeight: 600,
-        color: "#374151",
-        marginBottom: 6
-      }}>
-        {label} {required && <span style={{ color: "#ef4444" }}>*</span>}
-      </div>
-      <input
-        type={type}
-        style={{
-          width: "100%",
-          padding: "12px",
-          border: "2px solid #e5e7eb",
-          borderRadius: 8,
-          fontSize: 15,
-          transition: "border-color 0.2s, box-shadow 0.2s",
-          outline: "none",
-          boxSizing: "border-box",
-        }}
-        onFocus={(e) => {
-          e.target.style.borderColor = "#4a5568";
-          e.target.style.boxShadow = "0 0 0 3px rgba(74, 85, 104, 0.1)";
-        }}
-        onBlur={(e) => {
-          e.target.style.borderColor = "#e5e7eb";
-          e.target.style.boxShadow = "none";
-        }}
-        name={name}
-        value={vals[name]}
-        onChange={onChange}
-        placeholder={placeholder}
-      />
-    </label>
-  );
+  const Field = ({ name, label, placeholder = "", required = false, type = "text" }) => {
+    const inputId = `field-${name}`;
+
+    return (
+      <label htmlFor={inputId} style={{ display: "block" }}>
+        <div style={{
+          fontSize: 13,
+          fontWeight: 600,
+          color: "#374151",
+          marginBottom: 6
+        }}>
+          {label} {required && <span style={{ color: "#ef4444" }}>*</span>}
+        </div>
+        <input
+          id={inputId}
+          type={type}
+          className="form-input"
+          name={name}
+          value={vals[name]}
+          onChange={onChange}
+          placeholder={placeholder}
+        />
+      </label>
+    );
+  };
 
   const Section = ({ title, children }) => (
     <div style={styles.section}>
