@@ -8,6 +8,8 @@ import tos from "./templates/terms-of-service.md?raw";
 import ai from "./templates/ai-use-disclosure.md?raw";
 import cookie from "./templates/cookie-policy.md?raw";
 import retention from "./templates/retention-security-checklist.md?raw";
+import acceptable from "./templates/acceptable-use-policy.md?raw";
+import dmca from "./templates/dmca-policy.md?raw";
 
 const DEFAULTS = {
   COMPANY_NAME: "",
@@ -71,6 +73,8 @@ export default function App() {
       ["ai-use-disclosure.md", ai],
       ["cookie-policy.md", cookie],
       ["retention-security-checklist.md", retention],
+      ["acceptable-use-policy.md", acceptable],
+      ["dmca-policy.md", dmca],
     ];
 
     for (const [name, content] of files) {
@@ -228,7 +232,7 @@ Open each .md, review, and publish.
         <header style={styles.header}>
           <h1 style={styles.title}>Startup Policy Pack</h1>
           <p style={styles.subtitle}>
-            Generate GDPR-compliant privacy policies, terms of service, and compliance documents in minutes
+            Generate 7 GDPR-compliant legal documents in minutes: Privacy Policy, Terms of Service, AI Use Disclosure, Cookie Policy, Data Retention Checklist, Acceptable Use Policy, and DMCA Policy
           </p>
         </header>
 

@@ -5,6 +5,22 @@ Generate GDPR-compliant privacy policies, terms of service, and compliance docum
 ![Policy Pack Generator](https://img.shields.io/badge/License-MIT-blue.svg)
 ![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)
 
+## 🚀 Live Demo
+
+**[Try it now](https://okalangkenneth.github.io/startup-policy-pack-generator/)** - No installation required!
+
+## 📸 Screenshots
+
+### Main Interface
+![Main Form Interface](./docs/screenshots/main-form.png)
+*Professional grey-themed form with organized sections for easy data entry*
+
+### Generated Output
+![ZIP Download](./docs/screenshots/zip-output.png)
+*One-click ZIP download with all 7 policy documents*
+
+> **Note**: To add screenshots, take screenshots of the application and save them in `docs/screenshots/` folder.
+
 ## Overview
 
 A professional, single-file web application that helps startups and small businesses generate customized legal policy documents including:
@@ -14,15 +30,21 @@ A professional, single-file web application that helps startups and small busine
 - **AI Use Disclosure**
 - **Cookie Policy**
 - **Data Retention & Security Checklist**
+- **Acceptable Use Policy**
+- **DMCA Copyright Policy**
 
-## Features
+## ✨ Features
 
 - ✅ **Offline-first**: Works completely offline, no server required
-- ✅ **Single-file distribution**: Entire app in one HTML file
-- ✅ **Professional design**: Clean, modern UI with responsive layout
-- ✅ **Customizable templates**: Easy placeholder-based customization
-- ✅ **ZIP export**: Download all policies in one click
+- ✅ **Single-file distribution**: Entire app in one HTML file (256 KB)
+- ✅ **Professional design**: Clean, modern grey-themed UI with responsive layout
+- ✅ **7 Complete Templates**: All essential startup legal documents
+- ✅ **Organized Sections**: Form grouped into 6 logical categories
+- ✅ **Smart Validation**: Required field indicators and proper input types
+- ✅ **ZIP export**: Download all 7 policies in one click
 - ✅ **GDPR-focused**: Templates designed for European compliance
+- ✅ **GitHub Actions**: Automated builds and deployments
+- ✅ **Open Source**: MIT license, free to use and modify
 
 ## Quick Start
 
